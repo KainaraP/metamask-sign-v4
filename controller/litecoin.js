@@ -1,6 +1,6 @@
 const axios = require("axios");
 var fetch = require("cross-fetch");
-const litecoin = require("litecoinjs");
+const litecoinjs = require("litecoinjs");
 const bitcoinjs = require("bitcoinjs-lib");
 var request = require("request");
 

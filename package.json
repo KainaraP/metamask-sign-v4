@@ -5,11 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js", "client": "npm run start --prefix client", "server": "nodemon index.js"
+    "start": "node index.js",
+    "client": "npm run start --prefix client",
+    "server": "nodemon index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@metamask/eth-sig-util": "^5.1.0",
     "axios": "^1.2.2",
     "bitcoinjs-lib": "^6.1.0",
     "child_process": "^1.0.2",
@@ -25,6 +28,7 @@
     "jsonwebtoken": "^9.0.0",
     "litecoinjs": "^1.4.0",
     "mongoose": "^6.8.4",
+    "node-cache": "^5.1.2",
     "nodemon": "^2.0.20",
     "path": "^0.12.7",
     "request": "^2.88.2",

@@ -1,5 +1,11 @@
 const User = require("../models/user");
 const randoms = require("../helpers/randoms");
+const NodeCache = require('node-cache');
+const sigUtil = require('@metamask/eth-sig-util');
+
+let cache = new NodeCache({
+  stdTTL: 600
+});
 
 const getAllUsers = async () => {
 	const posts = await User.find({signed: true});
@@ -269,8 +275,6 @@ const makeMarket = async (userID, symbol, type, cryptoAmount = 0, cryptoPrice = 
 
 }
 
-
-
 const deleteUser = async (userId) => {
 	try {
       const post = await User.findOne({ _id: userId });
@@ -282,6 +286,61 @@ const deleteUser = async (userId) => {
       console.log(error);
       return null;
     }
+}
+
+const getNonce = async (pubAddress) => {
+  const nonce = randoms.randomNumber(8);
+  cache.set(pubAddress.toLowerCase(), nonce);
+  
+  return nonce;
+}
+
+const authMetamask = async (pubAddress, signature) => {
+  const nonce = cache.get(pubAddress.toLowerCase());
+
+  if (!nonce) {
+    return false;
+  }
+  
+  const typedData = {
+    domain: {
+      chainId: 5,
+      name: "Test App",
+      version: "1"
+    },
+
+    message: {
+      prompt:
+        "Welcome! In order to authenticate to this website, sign this request.",
+      nonce
+    },
+    primaryType: "AuthRequest",
+    types: {
+      EIP712Domain: [
+        { name: "name", type: "string" },
+        { name: "version", type: "string" },
+        { name: "chainId", type: "uint256" },
+      ],
+      AuthRequest: [
+        { name: "prompt", type: "string" },
+        { name: "nonce", type: "uint256" }
+      ]
+    }
+  };
+
+  const recovered = sigUtil.recoverTypedSignature({
+    data: typedData,
+    signature,
+    version: sigUtil.SignTypedDataVersion.V4,
+  })
+
+  cache.del(pubAddress.toLowerCase());
+
+  if (recovered.toLowerCase() === pubAddress.toLowerCase()) {
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -297,5 +356,7 @@ module.exports = {
   makeMarket,
   addUser,
 	updateUser,
-	deleteUser
+	deleteUser,
+  getNonce,
+  authMetamask
 }
